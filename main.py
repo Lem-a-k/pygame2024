@@ -2,6 +2,22 @@ import random
 
 import pygame
 
+
+class MovingSquare:
+    def __init__(self):
+        self.color = 0
+        self.pos = [10, 10]
+        self.dx, self.dy = 0, 0
+
+    def move(self):
+        self.color = (self.color + 1) % 256
+        self.pos[0] += self.dx
+        self.pos[1] += self.dy
+
+    def draw(self, screen):
+        screen.fill((self.color, self.color, self.color), (*self.pos, 50, 50))
+
+
 if __name__ == '__main__':
     pygame.init()
     size = width, height = 800, 400
@@ -12,24 +28,30 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     MY_EVENT = pygame.USEREVENT + 1
     pygame.time.set_timer(MY_EVENT, 1000)
-    special_color = 0
-    pos = [10, 10]
+
+    ms = MovingSquare()
     while running:
-        # внутри игрового цикла ещё один цикл
-        # приема и обработки сообщений
         for event in pygame.event.get():
-            # при закрытии окна
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RIGHT:
-                    pos[0] += 10
+                    ms.dx = 10
                 elif event.key == pygame.K_LEFT:
-                    pos[0] -= 10
+                    ms.dx = -10
                 elif event.key == pygame.K_UP:
-                    pos[1] -= 10
+                    ms.dy = -10
                 elif event.key == pygame.K_DOWN:
-                    pos[1] += 10
+                    ms.dy = 10
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_RIGHT:
+                    ms.dx = 0
+                elif event.key == pygame.K_LEFT:
+                    ms.dx = 0
+                elif event.key == pygame.K_UP:
+                    ms.dy = 0
+                elif event.key == pygame.K_DOWN:
+                    ms.dy = 0
             if event.type == MY_EVENT:
                 screen.fill((0, 0, 0),
                             (0, 0, width, height))
@@ -39,8 +61,9 @@ if __name__ == '__main__':
                                 (random.random() * width,
                                  random.random() * height, 5, 5))
         # обновление экрана
-        special_color = (special_color + 1) % 256
-        screen.fill((special_color, special_color, special_color), (*pos, 50, 50))
+        ms.move()
+        ms.draw(screen)
+
         pygame.display.flip()
         clock.tick(fps)
     pygame.quit()
