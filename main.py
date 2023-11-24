@@ -9,6 +9,22 @@ class MovingSquare:
         self.pos = [10, 10]
         self.dx, self.dy = 0, 0
 
+    def process_event(self, event):
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                self.dx = 10
+            elif event.key == pygame.K_LEFT:
+                self.dx = -10
+            elif event.key == pygame.K_UP:
+                self.dy = -10
+            elif event.key == pygame.K_DOWN:
+                self.dy = 10
+        elif event.type == pygame.KEYUP:
+            if event.key in (pygame.K_RIGHT, pygame.K_LEFT):
+                self.dx = 0
+            elif event.key in (pygame.K_UP, pygame.K_DOWN):
+                self.dy = 0
+
     def move(self):
         self.color = (self.color + 1) % 256
         self.pos[0] += self.dx
@@ -35,23 +51,9 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 running = False
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    ms.dx = 10
-                elif event.key == pygame.K_LEFT:
-                    ms.dx = -10
-                elif event.key == pygame.K_UP:
-                    ms.dy = -10
-                elif event.key == pygame.K_DOWN:
-                    ms.dy = 10
+                ms.process_event(event)
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_RIGHT:
-                    ms.dx = 0
-                elif event.key == pygame.K_LEFT:
-                    ms.dx = 0
-                elif event.key == pygame.K_UP:
-                    ms.dy = 0
-                elif event.key == pygame.K_DOWN:
-                    ms.dy = 0
+                ms.process_event(event)
             if event.type == MY_EVENT:
                 screen.fill((0, 0, 0),
                             (0, 0, width, height))
