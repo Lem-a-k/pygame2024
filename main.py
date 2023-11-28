@@ -41,9 +41,14 @@ class Board:
                               0 <= col < self.width) else None
 
     def on_click(self, cell):
-        self.board[cell[0]][cell[1]] = (random.randint(0, 255),
-                                        random.randint(0, 255),
-                                        random.randint(0, 255))
+        for i in range(self.height):
+            self.board[i][cell[1]] = (random.randint(0, 255),
+                                      random.randint(0, 255),
+                                      random.randint(0, 255))
+        for j in range(self.width):
+            self.board[cell[0]][j] = (random.randint(0, 255),
+                                      random.randint(0, 255),
+                                      random.randint(0, 255))
 
     def process_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
@@ -61,7 +66,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     # MY_EVENT = pygame.USEREVENT + 1
     # pygame.time.set_timer(MY_EVENT, 1000)
-    board = Board(4, 3)  # n = 3, m = 4
+    board = Board(7, 5)  # n = 5, m = 7
     board.set_view(20, 50, 100)
     while running:
         for event in pygame.event.get():
