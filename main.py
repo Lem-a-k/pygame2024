@@ -3,69 +3,53 @@ import random
 import pygame
 
 
-class MovingSquare:
-    def __init__(self):
-        self.color = 0
-        self.pos = [10, 10]
-        self.dx, self.dy = 0, 0
+class Board:
+    # создание поля
+    def __init__(self, board_width, board_height):
+        self.width = board_width
+        self.height = board_height
+        self.board = [[0] * self.width for _ in range(self.height)]
+        # значения по умолчанию
+        self.left = 50
+        self.top = 10
+        self.cell_size = 30
 
-    def process_event(self, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_RIGHT:
-                self.dx = 10
-            elif event.key == pygame.K_LEFT:
-                self.dx = -10
-            elif event.key == pygame.K_UP:
-                self.dy = -10
-            elif event.key == pygame.K_DOWN:
-                self.dy = 10
-        elif event.type == pygame.KEYUP:
-            if event.key in (pygame.K_RIGHT, pygame.K_LEFT):
-                self.dx = 0
-            elif event.key in (pygame.K_UP, pygame.K_DOWN):
-                self.dy = 0
+    # настройка внешнего вида
+    def set_view(self, left, top, cell_size):
+        self.left = left
+        self.top = top
+        self.cell_size = cell_size
 
-    def move(self):
-        self.color = (self.color + 1) % 256
-        self.pos[0] += self.dx
-        self.pos[1] += self.dy
-
-    def draw(self, screen):
-        screen.fill((self.color, self.color, self.color), (*self.pos, 50, 50))
+    def render(self, screen):
+        for i in range(self.height):
+            for j in range(self.width):
+                r = (self.left + j * self.cell_size + 1,
+                     self.top + i * self.cell_size + 1,
+                     self.cell_size - 2, self.cell_size - 2)
+                pygame.draw.rect(screen, (255, 255, 255), r, 1)
 
 
 if __name__ == '__main__':
     pygame.init()
-    size = width, height = 800, 400
+    size = width, height = 900, 600
     screen = pygame.display.set_mode(size)
 
     running = True
     fps = 30
     clock = pygame.time.Clock()
-    MY_EVENT = pygame.USEREVENT + 1
-    pygame.time.set_timer(MY_EVENT, 1000)
-
-    ms = MovingSquare()
+    # MY_EVENT = pygame.USEREVENT + 1
+    # pygame.time.set_timer(MY_EVENT, 1000)
+    board = Board(4, 3)  # n = 3, m = 4
+    board.set_view(20, 50, 100)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                ms.process_event(event)
-            elif event.type == pygame.KEYUP:
-                ms.process_event(event)
-            if event.type == MY_EVENT:
-                screen.fill((0, 0, 0),
-                            (0, 0, width, height))
-                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-                for i in range(100):
-                    screen.fill(color,
-                                (random.random() * width,
-                                 random.random() * height, 5, 5))
+            # elif event.type == MY_EVENT:
+            #     # 123
         # обновление экрана
-        ms.move()
-        ms.draw(screen)
-
+        screen.fill((0, 0, 0))
+        board.render(screen)
         pygame.display.flip()
         clock.tick(fps)
     pygame.quit()
