@@ -8,6 +8,7 @@ import pygame
 class Board:
     # создание поля
     def __init__(self, board_width, board_height):
+        self.board_updating = False
         self.width = board_width
         self.height = board_height
         self.board = [[0] * self.width for _ in range(self.height)]
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     fps = 30
     clock = pygame.time.Clock()
     BOARD_UPDATE = pygame.USEREVENT + 1
-    pygame.time.set_timer(BOARD_UPDATE, 1000)
+
     board = Board(40, 25)
     board.set_view(10, 10, 20)
     while running:
@@ -84,6 +85,10 @@ if __name__ == '__main__':
                 board.update()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 board.process_click(event.pos)
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    pygame.time.set_timer(BOARD_UPDATE, 0 if board.board_updating else 1000)
+                    board.board_updating = not board.board_updating
         # обновление экрана
         screen.fill((0, 0, 0))
         board.render(screen)
