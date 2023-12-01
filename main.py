@@ -11,7 +11,8 @@ class Board:
         self.board_updating = False
         self.width = board_width
         self.height = board_height
-        self.board = [[0] * self.width for _ in range(self.height)]
+        self.board = [[0 if random.randrange(5) else 1 for _ in range(self.width)]
+                      for _ in range(self.height)]
         # значения по умолчанию
         self.left = 50
         self.top = 10
@@ -39,13 +40,13 @@ class Board:
         return (row, col) if (0 <= row < self.height and
                               0 <= col < self.width) else None
 
-    def on_click(self, cell):
-        self.board[cell[0]][cell[1]] ^= 1
+    def on_click(self, cell, value):
+        self.board[cell[0]][cell[1]] = value
 
-    def process_click(self, mouse_pos):
+    def process_click(self, mouse_pos, value):
         cell = self.get_cell(mouse_pos)
         if cell is not None:
-            self.on_click(cell)
+            self.on_click(cell, value)
 
     def update(self):
         new_board = deepcopy(self.board)
@@ -75,6 +76,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
     BOARD_UPDATE = pygame.USEREVENT + 1
 
+    state = None
     board = Board(40, 25)
     board.set_view(10, 10, 20)
     while running:
@@ -84,7 +86,15 @@ if __name__ == '__main__':
             elif event.type == BOARD_UPDATE:
                 board.update()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                board.process_click(event.pos)
+                if event.button == 1:
+                    state = 1
+                elif event.button == 3:
+                    state = 0
+            elif event.type == pygame.MOUSEBUTTONUP:
+                state = None
+            elif event.type == pygame.MOUSEMOTION:
+                if state is not None:
+                    board.process_click(event.pos, state)
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     pygame.time.set_timer(BOARD_UPDATE, 0 if board.board_updating else 1000)
