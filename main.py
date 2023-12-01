@@ -1,4 +1,6 @@
 import random
+from copy import deepcopy
+from itertools import product
 
 import pygame
 
@@ -8,7 +10,7 @@ class Board:
     def __init__(self, board_width, board_height):
         self.width = board_width
         self.height = board_height
-        self.board = [[None] * self.width for _ in range(self.height)]
+        self.board = [[0] * self.width for _ in range(self.height)]
         # значения по умолчанию
         self.left = 50
         self.top = 10
@@ -26,13 +28,9 @@ class Board:
                 r = (self.left + j * self.cell_size,
                      self.top + i * self.cell_size,
                      self.cell_size, self.cell_size)
-                # r_b = (r[0] + 1, r[1] + 1, r[2] - 2, r[3] - 2)
-                if self.board[i][j] is not None:
-                    # r_inner = (r_b[0] + 1, r_b[1] + 1,
-                    #            r_b[2] - 2, r_b[3] - 2)
-                    pygame.draw.rect(screen, self.board[i][j], r)
+                if self.board[i][j] == 1:
+                    pygame.draw.rect(screen, (0, 255, 0), r)
                 pygame.draw.rect(screen, (255, 255, 255), r, 1)
-
 
     def get_cell(self, mouse_pos):
         row = (mouse_pos[1] - self.top) // self.cell_size
@@ -41,19 +39,29 @@ class Board:
                               0 <= col < self.width) else None
 
     def on_click(self, cell):
-        for i in range(self.height):
-            self.board[i][cell[1]] = (random.randint(0, 255),
-                                      random.randint(0, 255),
-                                      random.randint(0, 255))
-        for j in range(self.width):
-            self.board[cell[0]][j] = (random.randint(0, 255),
-                                      random.randint(0, 255),
-                                      random.randint(0, 255))
+        self.board[cell[0]][cell[1]] ^= 1
 
     def process_click(self, mouse_pos):
         cell = self.get_cell(mouse_pos)
         if cell is not None:
             self.on_click(cell)
+
+    def update(self):
+        new_board = deepcopy(self.board)
+        for i in range(self.height):
+            for j in range(self.width):
+                neighbours = 0
+                for di, dj in product((-1, 0, 1), repeat=2):
+                    if di == dj == 0:
+                        continue
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < self.height and 0 <= nj < self.width:
+                        neighbours += self.board[ni][nj]
+                if neighbours <= 1 or neighbours > 3:
+                    new_board[i][j] = 0
+                elif neighbours == 3:
+                    new_board[i][j] = 1
+        self.board = new_board
 
 
 if __name__ == '__main__':
@@ -64,16 +72,16 @@ if __name__ == '__main__':
     running = True
     fps = 30
     clock = pygame.time.Clock()
-    # MY_EVENT = pygame.USEREVENT + 1
-    # pygame.time.set_timer(MY_EVENT, 1000)
-    board = Board(7, 5)  # n = 5, m = 7
-    board.set_view(20, 50, 100)
+    BOARD_UPDATE = pygame.USEREVENT + 1
+    pygame.time.set_timer(BOARD_UPDATE, 1000)
+    board = Board(40, 25)
+    board.set_view(10, 10, 20)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            # elif event.type == MY_EVENT:
-            #     # 123
+            elif event.type == BOARD_UPDATE:
+                board.update()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 board.process_click(event.pos)
         # обновление экрана
