@@ -61,7 +61,8 @@ class Board:
         cell = self.get_cell(mouse_pos)
         if cell is not None:
             self.shown[cell[0]][cell[1]] = True
-            self.open_nei(cell[0], cell[1])
+            if self.num_nei[cell[0]][cell[1]] == 0:
+                self.open_nei(cell[0], cell[1])
 
     def open_nei(self, i, j):
         for di, dj in product((-1, 0, 1), repeat=2):
