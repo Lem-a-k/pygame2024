@@ -13,10 +13,14 @@ class Board:
         self.height = board_height
         self.board = [[0 if random.randrange(5) else 1 for _ in range(self.width)]
                       for _ in range(self.height)]
+        self.num_nei = [[None] * self.width for _ in range(self.height)]
+        self.shown = [[False] * self.width for _ in range(self.height)]
         # значения по умолчанию
         self.left = 50
         self.top = 10
         self.cell_size = 30
+
+        self.font = pygame.font.Font(None, 20)
 
     # настройка внешнего вида
     def set_view(self, left, top, cell_size):
@@ -32,6 +36,11 @@ class Board:
                      self.cell_size, self.cell_size)
                 if self.board[i][j] == 1:
                     pygame.draw.rect(screen, (0, 255, 0), r)
+                if self.num_nei[i][j] is not None and self.shown[i][j]:
+                    digit = self.font.render(str(self.num_nei[i][j]),
+                                             True, (100, 100, 255))
+                    screen.blit(digit, (r[0] + 2, r[1] + 2))
+
                 pygame.draw.rect(screen, (255, 255, 255), r, 1)
 
     def get_cell(self, mouse_pos):
@@ -48,6 +57,23 @@ class Board:
         if cell is not None:
             self.on_click(cell, value)
 
+    def open(self, mouse_pos):
+        cell = self.get_cell(mouse_pos)
+        if cell is not None:
+            self.shown[cell[0]][cell[1]] = True
+            self.open_nei(cell[0], cell[1])
+
+    def open_nei(self, i, j):
+        for di, dj in product((-1, 0, 1), repeat=2):
+            if di == dj == 0:
+                continue
+            ni, nj = i + di, j + dj
+            if 0 <= ni < self.height and 0 <= nj < self.width:
+                if not self.shown[ni][nj]:
+                    self.shown[ni][nj] = True
+                    if self.num_nei[ni][nj] == 0:
+                        self.open_nei(ni, nj)
+
     def update(self):
         new_board = deepcopy(self.board)
         for i in range(self.height):
@@ -59,6 +85,7 @@ class Board:
                     ni, nj = i + di, j + dj
                     if 0 <= ni < self.height and 0 <= nj < self.width:
                         neighbours += self.board[ni][nj]
+                self.num_nei[i][j] = neighbours
                 if neighbours <= 1 or neighbours > 3:
                     new_board[i][j] = 0
                 elif neighbours == 3:
@@ -90,6 +117,8 @@ if __name__ == '__main__':
                     state = 1
                 elif event.button == 3:
                     state = 0
+                elif event.button == 2:
+                    board.open(event.pos)
             elif event.type == pygame.MOUSEBUTTONUP:
                 state = None
             elif event.type == pygame.MOUSEMOTION:
