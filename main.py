@@ -62,9 +62,26 @@ class Board:
         if cell is not None:
             self.shown[cell[0]][cell[1]] = True
             if self.num_nei[cell[0]][cell[1]] == 0:
-                self.open_nei(cell[0], cell[1])
+                self.open_nei_shortest(cell[0], cell[1])
 
-    def open_nei(self, i, j):
+    def open_nei_shortest(self, i, j):  # обход в ширину
+        cur_gen = [(i, j)]
+        while cur_gen:
+            next_gen = []
+            for i, j in cur_gen:
+                for di, dj in product((-1, 0, 1), repeat=2):
+                    if di == dj == 0:
+                        continue
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < self.height and 0 <= nj < self.width:
+                        if not self.shown[ni][nj]:
+                            self.shown[ni][nj] = True
+                            if self.num_nei[ni][nj] == 0:
+                                next_gen.append((ni, nj))
+            cur_gen = next_gen
+
+
+    def open_nei(self, i, j):  # обход в глубину
         for di, dj in product((-1, 0, 1), repeat=2):
             if di == dj == 0:
                 continue
