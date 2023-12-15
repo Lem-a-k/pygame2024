@@ -36,9 +36,11 @@ class MovingSquare(pygame.sprite.Sprite):
         super().__init__(*groups)
         self.color = 0
         self.pos = [10, 10]
+        self.size = 50
         self.dx, self.dy = 0, 0
-        self.image = pygame.Surface([])
-        screen.fill((self.color, self.color, self.color), (*self.pos, 50, 50))
+        self.image = pygame.Surface([self.size, self.size], pygame.SRCALPHA, 32)
+        self.image.fill((self.color, self.color, self.color))
+        self.rect = pygame.Rect(*self.pos, self.size, self.size)
 
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -56,11 +58,12 @@ class MovingSquare(pygame.sprite.Sprite):
             elif event.key in (pygame.K_UP, pygame.K_DOWN):
                 self.dy = 0
 
-    def move(self):
+    def update(self):
         self.color = (self.color + 1) % 256
         self.pos[0] += self.dx
         self.pos[1] += self.dy
-
+        self.image.fill((self.color, self.color, self.color))
+        self.rect = pygame.Rect(*self.pos, self.size, self.size)
 
 
 if __name__ == '__main__':
@@ -73,6 +76,7 @@ if __name__ == '__main__':
     horizontal_borders = pygame.sprite.Group()
     vertical_borders = pygame.sprite.Group()
     balls = pygame.sprite.Group()
+    square = pygame.sprite.GroupSingle()
 
     Border(5, 5, width - 5, 5, horizontal_borders, all_sprites)
     Border(5, height - 5, width - 5, height - 5, horizontal_borders, all_sprites)
@@ -82,23 +86,25 @@ if __name__ == '__main__':
     for i in range(10):
         Ball(20, 100, 100, balls, all_sprites)
 
-    # ms = MovingSquare()
+    ms = MovingSquare(square, all_sprites)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            # elif event.type == pygame.KEYDOWN:
-            #     ms.process_event(event)
-            # elif event.type == pygame.KEYUP:
-            #     ms.process_event(event)
+            elif event.type == pygame.KEYDOWN:
+                ms.process_event(event)
+            elif event.type == pygame.KEYUP:
+                ms.process_event(event)
         # обновление экрана
         # ms.move()
         screen.fill((255, 255, 255),
                     (0, 0, width, height))
         balls.update()
+        square.update()
         vertical_borders.draw(screen)
         horizontal_borders.draw(screen)
         balls.draw(screen)
+        square.draw(screen)
 
         pygame.display.flip()
         clock.tick(fps)
