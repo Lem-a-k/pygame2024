@@ -21,6 +21,10 @@ class Ball(pygame.sprite.Sprite):
 
     def update(self):
         self.rect = self.rect.move(self.vx, self.vy)
+        if pygame.sprite.spritecollideany(self, horizontal_borders):
+            self.vy = -self.vy
+        if pygame.sprite.spritecollideany(self, vertical_borders):
+            self.vx = -self.vx
 
 
 class Border(pygame.sprite.Sprite):
@@ -84,7 +88,7 @@ if __name__ == '__main__':
     Border(width - 5, 5, width - 5, height - 5, vertical_borders, all_sprites)
 
     for i in range(10):
-        Ball(20, 100, 100, balls, all_sprites)
+        Ball(20, width // 2 - 10, height // 2 - 10, balls, all_sprites)
 
     ms = MovingSquare(square, all_sprites)
     while running:
