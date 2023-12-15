@@ -88,7 +88,7 @@ if __name__ == '__main__':
     Border(width - 5, 5, width - 5, height - 5, vertical_borders, all_sprites)
 
     for i in range(10):
-        Ball(20, width // 2 - 10, height // 2 - 10, balls, all_sprites)
+        Ball(40, width // 2 - 10, height // 2 - 10, balls, all_sprites)
 
     ms = MovingSquare(square, all_sprites)
     while running:
