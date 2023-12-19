@@ -1,10 +1,32 @@
 import random
+import os
+import sys
 
 import pygame
+
+MENU = 'menu'
+GAME = 'game'
+PAUSE = 'pause'
 
 pygame.init()
 size = width, height = 800, 400
 screen = pygame.display.set_mode(size)
+
+
+def load_image(name, colorkey=None):
+    fullname = os.path.join('data', name)
+    if not os.path.isfile(fullname):
+        print(f"Файл с изображением '{fullname}' не найден")
+        sys.exit()
+    image = pygame.image.load(fullname)
+    if colorkey is not None:
+        # image = image.convert()
+        if colorkey == -1:
+            colorkey = image.get_at((0, 0))
+        image.set_colorkey(colorkey)
+    else:
+        image = image.convert_alpha()
+    return image
 
 
 class Ball(pygame.sprite.Sprite):
@@ -21,10 +43,6 @@ class Ball(pygame.sprite.Sprite):
 
     def update(self):
         self.rect = self.rect.move(self.vx, self.vy)
-        if pygame.sprite.spritecollideany(self, horizontal_borders):
-            self.vy = -self.vy
-        if pygame.sprite.spritecollideany(self, vertical_borders):
-            self.vx = -self.vx
 
 
 class Border(pygame.sprite.Sprite):
@@ -40,9 +58,11 @@ class MovingSquare(pygame.sprite.Sprite):
         super().__init__(*groups)
         self.color = 0
         self.pos = [10, 10]
+        self.size = 50
         self.dx, self.dy = 0, 0
-        self.image = pygame.Surface([])
-        screen.fill((self.color, self.color, self.color), (*self.pos, 50, 50))
+        self.image = pygame.Surface([self.size, self.size], pygame.SRCALPHA, 32)
+        self.image.fill((self.color, self.color, self.color))
+        self.rect = pygame.Rect(*self.pos, self.size, self.size)
 
     def process_event(self, event):
         if event.type == pygame.KEYDOWN:
@@ -60,11 +80,12 @@ class MovingSquare(pygame.sprite.Sprite):
             elif event.key in (pygame.K_UP, pygame.K_DOWN):
                 self.dy = 0
 
-    def move(self):
+    def update(self):
         self.color = (self.color + 1) % 256
         self.pos[0] += self.dx
         self.pos[1] += self.dy
-
+        self.image.fill((self.color, self.color, self.color))
+        self.rect = pygame.Rect(*self.pos, self.size, self.size)
 
 
 if __name__ == '__main__':
@@ -77,6 +98,7 @@ if __name__ == '__main__':
     horizontal_borders = pygame.sprite.Group()
     vertical_borders = pygame.sprite.Group()
     balls = pygame.sprite.Group()
+    square = pygame.sprite.GroupSingle()
 
     Border(5, 5, width - 5, 5, horizontal_borders, all_sprites)
     Border(5, height - 5, width - 5, height - 5, horizontal_borders, all_sprites)
@@ -84,25 +106,66 @@ if __name__ == '__main__':
     Border(width - 5, 5, width - 5, height - 5, vertical_borders, all_sprites)
 
     for i in range(10):
-        Ball(30, width // 2 - 10, height // 2 - 10, balls, all_sprites)
+        Ball(20, 100, 100, balls, all_sprites)
 
-    # ms = MovingSquare()
+    state = MENU
+    ms = MovingSquare(square, all_sprites)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            # elif event.type == pygame.KEYDOWN:
-            #     ms.process_event(event)
-            # elif event.type == pygame.KEYUP:
-            #     ms.process_event(event)
+            elif event.type == pygame.KEYDOWN:
+                if state == GAME:
+                    if event.key == pygame.K_ESCAPE:
+                        state = MENU
+                    elif event.key == pygame.K_SPACE:
+                        state = PAUSE
+                    else:
+                        ms.process_event(event)
+                elif state == MENU:
+                    if event.key == pygame.K_SPACE:
+                        state = GAME
+                elif state == PAUSE:
+                    if event.key == pygame.K_SPACE:
+                        state = GAME
+                    elif event.key == pygame.K_ESCAPE:
+                        state = MENU
+            elif event.type == pygame.KEYUP:
+                if state == GAME:
+                    ms.process_event(event)
         # обновление экрана
-        # ms.move()
         screen.fill((255, 255, 255),
                     (0, 0, width, height))
-        balls.update()
-        vertical_borders.draw(screen)
-        horizontal_borders.draw(screen)
-        balls.draw(screen)
+        if state == GAME:
+            balls.update()
+            square.update()
+            vertical_borders.draw(screen)
+            horizontal_borders.draw(screen)
+            balls.draw(screen)
+            square.draw(screen)
+        elif state == PAUSE:
+            vertical_borders.draw(screen)
+            horizontal_borders.draw(screen)
+            balls.draw(screen)
+            square.draw(screen)
+        elif state == MENU:
+            intro_text = ["ЗАСТАВКА", "",
+                          "Правила игры",
+                          "Если в правилах несколько строк,",
+                          "приходится выводить их построчно"]
+
+            fon = pygame.transform.scale(load_image('fon.jpg'), (width, height))
+            screen.blit(fon, (0, 0))
+            font = pygame.font.Font(None, 30)
+            text_coord = 50
+            for line in intro_text:
+                string_rendered = font.render(line, 1, pygame.Color('black'))
+                intro_rect = string_rendered.get_rect()
+                text_coord += 10
+                intro_rect.top = text_coord
+                intro_rect.x = 10
+                text_coord += intro_rect.height
+                screen.blit(string_rendered, intro_rect)
 
         pygame.display.flip()
         clock.tick(fps)
