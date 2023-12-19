@@ -43,6 +43,10 @@ class Ball(pygame.sprite.Sprite):
 
     def update(self):
         self.rect = self.rect.move(self.vx, self.vy)
+        if pygame.sprite.spritecollideany(self, horizontal_borders):
+            self.vy = -self.vy
+        if pygame.sprite.spritecollideany(self, vertical_borders):
+            self.vx = -self.vx
 
 
 class Border(pygame.sprite.Sprite):
@@ -150,7 +154,9 @@ if __name__ == '__main__':
             square.draw(screen)
         elif state == MENU:
             intro_text = ["ЗАСТАВКА", "",
-                          "Правила игры",
+                          "Пробел - запуск игры и старт/пауза",
+                          "Esc - выход в меню",
+                          "",
                           "Если в правилах несколько строк,",
                           "приходится выводить их построчно"]
 
