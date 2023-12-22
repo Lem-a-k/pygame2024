@@ -33,11 +33,14 @@ class Ball(pygame.sprite.Sprite):
     def __init__(self, radius, x, y, *groups):
         super().__init__(*groups)
         self.radius = radius
-        self.image = pygame.Surface((2 * radius, 2 * radius),
-                                    pygame.SRCALPHA, 32)
-        pygame.draw.circle(self.image, pygame.Color("red"),
-                           (radius, radius), radius)
-        self.rect = pygame.Rect(x, y, 2 * radius, 2 * radius)
+        self.image = load_image('car_tr.png')
+        # self.image = pygame.Surface((2 * radius, 2 * radius),
+        #                             pygame.SRCALPHA, 32)
+        # pygame.draw.circle(self.image, pygame.Color("red"),
+        #                    (radius, radius), radius)
+        # self.rect = pygame.Rect(x, y, 2 * radius, 2 * radius)
+        self.rect = self.image.get_rect()
+        self.rect = self.rect.move(400, 200)
         self.vx = random.randint(-5, 5)
         self.vy = random.randrange(-5, 5)
 
@@ -119,7 +122,8 @@ if __name__ == '__main__':
     running = True
     fps = 20
     clock = pygame.time.Clock()
-    screen.fill((255, 255, 255))
+    back_color = (180, 180, 255)
+    screen.fill(back_color)
 
     all_sprites = pygame.sprite.Group()
     horizontal_borders = pygame.sprite.Group()
@@ -134,7 +138,7 @@ if __name__ == '__main__':
     Border(width - 5, 5, width - 5, height - 5, vertical_borders, all_sprites)
 
     for i in range(10):
-        Ball(20, 100, 100, balls, all_sprites)
+        Ball(20, width // 2, height // 2, balls, all_sprites)
 
     state = MENU
     ms = MovingSquare(square, all_sprites)
@@ -165,7 +169,7 @@ if __name__ == '__main__':
                 if state == GAME:
                     ms.process_event(event)
         # обновление экрана
-        screen.fill((255, 255, 255),
+        screen.fill(back_color,
                     (0, 0, width, height))
         if state == GAME:
             balls.update()
