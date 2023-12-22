@@ -117,7 +117,7 @@ class AnimatedSprite(pygame.sprite.Sprite):
 
 if __name__ == '__main__':
     running = True
-    fps = 30
+    fps = 20
     clock = pygame.time.Clock()
     screen.fill((255, 255, 255))
 
@@ -138,8 +138,8 @@ if __name__ == '__main__':
 
     state = MENU
     ms = MovingSquare(square, all_sprites)
-    drag = AnimatedSprite(load_image("pygame-8-1.png"), 8, 2,
-                          width - 10, height - 100,
+    drag = AnimatedSprite(load_image("pygame-8-1.png", -1), 8, 2,
+                          width - 150, height - 150,
                           dragon, all_sprites)
     while running:
         for event in pygame.event.get():
