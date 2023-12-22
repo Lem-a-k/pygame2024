@@ -92,6 +92,29 @@ class MovingSquare(pygame.sprite.Sprite):
         self.rect = pygame.Rect(*self.pos, self.size, self.size)
 
 
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y, *groups):
+        super().__init__(*groups)
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
+
+
 if __name__ == '__main__':
     running = True
     fps = 30
@@ -103,6 +126,7 @@ if __name__ == '__main__':
     vertical_borders = pygame.sprite.Group()
     balls = pygame.sprite.Group()
     square = pygame.sprite.GroupSingle()
+    dragon = pygame.sprite.GroupSingle()
 
     Border(5, 5, width - 5, 5, horizontal_borders, all_sprites)
     Border(5, height - 5, width - 5, height - 5, horizontal_borders, all_sprites)
@@ -114,6 +138,9 @@ if __name__ == '__main__':
 
     state = MENU
     ms = MovingSquare(square, all_sprites)
+    dragon = AnimatedSprite(load_image("dragon_sheet8x2.png"), 8, 2,
+                            width - 10, height - 100,
+                            dragon, all_sprites)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
