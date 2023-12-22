@@ -138,9 +138,9 @@ if __name__ == '__main__':
 
     state = MENU
     ms = MovingSquare(square, all_sprites)
-    dragon = AnimatedSprite(load_image("dragon_sheet8x2.png"), 8, 2,
-                            width - 10, height - 100,
-                            dragon, all_sprites)
+    drag = AnimatedSprite(load_image("pygame-8-1.png"), 8, 2,
+                          width - 10, height - 100,
+                          dragon, all_sprites)
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -170,10 +170,12 @@ if __name__ == '__main__':
         if state == GAME:
             balls.update()
             square.update()
+            dragon.update()
             vertical_borders.draw(screen)
             horizontal_borders.draw(screen)
             balls.draw(screen)
             square.draw(screen)
+            dragon.draw(screen)
         elif state == PAUSE:
             vertical_borders.draw(screen)
             horizontal_borders.draw(screen)
